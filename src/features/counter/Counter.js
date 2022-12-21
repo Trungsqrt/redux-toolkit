@@ -11,7 +11,7 @@ import {
 function Counter() {
    const count = useSelector((state) => state.counter.count);
    const dispatch = useDispatch();
-   console.log(count);
+
    return (
       <div>
          <p>{count}</p>

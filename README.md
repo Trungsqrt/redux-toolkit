@@ -1,70 +1,185 @@
-# Getting Started with Create React App
+# Create Slice
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> In redux-toolkit I seperate **Reducer, Action** into many **slice** that depend on the components
+> Actions write direct in reducer
 
-## Available Scripts
+**Full code counterSlice.js**
 
-In the project directory, you can run:
+```js
+import { createSlice } from "@reduxjs/toolkit";
 
-### `npm start`
+const initialState = {
+   count: 0,
+};
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+export const counterSlice = createSlice({
+   name: "counter",
+   initialState,
+   reducers: {
+      increment: (state) => {
+         state.count += 1;
+      },
+      decrement: (state) => {
+         state.count -= 1;
+      },
+      incrementByAmount: (state, payload) => {
+         state.count += payload;
+      },
+      decrementByAmount: (state, payload) => {
+         state.count -= payload;
+      },
+   },
+});
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+export const { increment, decrement, incrementByAmount, decrementByAmount } =
+   counterSlice.actions;
+export default counterSlice.reducer;
+```
 
-### `npm test`
+**import createSlice hook to create slice**
+`import { createSlice } from "@reduxjs/toolkit";`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+**initial state similar redux core**
 
-### `npm run build`
+```js
+const initialState = {
+   count: 0,
+};
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+**createSlice**
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```js
+export const counterSlice = createSlice({
+   name: "counter", //
+   initialState, //
+   reducers: {
+      increment: (state) => {
+         state.count += 1;
+      },
+      decrement: (state) => {
+         state.count -= 1;
+      },
+      incrementByAmount: (state, payload) => {
+         state.count += payload;
+      },
+      decrementByAmount: (state, payload) => {
+         state.count -= payload;
+      },
+   },
+});
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+> At here I can see I can write everything (reducer, action)
+> **I don't mention to write immutate or mutate bla..bla**
+> redux toolkit allow me to write mutate **but** in fact redux toolkit import the _Immer library_
+> Immer library convert mutate to immutate
 
-### `npm run eject`
+```js
+increment: (state) => {
+   state.count += 1;
+};
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+**export**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```js
+export const { increment, decrement, incrementByAmount, decrementByAmount } =
+   counterSlice.actions;
+export default counterSlice.reducer;
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+`export const { increment, decrement, incrementByAmount, decrementByAmount } = counterSlice.actions;`
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+> when I dispatch(increment()) -> RTK automatic create a _action creator_ with the same name
 
-## Learn More
+`export default counterSlice.reducer;`
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+> use with store (configureStore)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# store.js
 
-### Code Splitting
+```js
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "../features/counter/counterSlice";
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+export const store = configureStore({
+   reducer: {
+      counter: counterReducer,
+   },
+});
+```
 
-### Analyzing the Bundle Size
+# Counter.js
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+**Full code**
 
-### Making a Progressive Web App
+```js
+import { useSelector, useDispatch } from "react-redux";
+import counterSlice from "./counterSlice";
+import {
+   decrement,
+   increment,
+   decrementByAmount,
+   incrementByAmount,
+} from "./counterSlice";
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+function Counter() {
+   const count = useSelector((state) => state.counter.count);
+   const dispatch = useDispatch();
 
-### Advanced Configuration
+   return (
+      <div>
+         <p>{count}</p>
+         <button onClick={() => dispatch(increment())}>+</button>
+         <button onClick={() => dispatch(decrement())}>-</button>
+         <button onClick={() => dispatch(decrementByAmount(2))}>--</button>
+         <button onClick={() => dispatch(incrementByAmount(5))}>++</button>
+      </div>
+   );
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+export default Counter;
+```
 
-### Deployment
+**import all action from counterSlice**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```js
+import { useSelector, useDispatch } from "react-redux";
+import counterSlice from "./counterSlice";
+import {
+   decrement,
+   increment,
+   decrementByAmount,
+   incrementByAmount,
+} from "./counterSlice";
+```
 
-### `npm run build` fails to minify
+`const count = useSelector((state) => state.counter.count);`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+> **counter** is name of reducer in store.js
+
+```js
+export const store = configureStore({
+   reducer: {
+      counter: counterReducer,
+   },
+});
+```
+
+> **count** is data in initialState
+
+# App.js
+
+```js
+import { store } from "./app/store";
+import { Provider } from "react-redux";
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+   <Provider store={store}>
+      <React.StrictMode>
+         <App />
+      </React.StrictMode>
+   </Provider>
+);
+```
